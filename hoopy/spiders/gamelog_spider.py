@@ -50,4 +50,3 @@ class GameSpider(scrapy.Spider):
                 'college': college
             }
         next_page = response.xpath('//table[@id="players"]/tbody/tr/th//a/@href').extract_first()
-        print(next_page)
