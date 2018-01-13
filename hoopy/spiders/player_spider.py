@@ -17,9 +17,17 @@ class PlayerSpider(scrapy.Spider):
     
     def parse_stats(self, response):
         rows = response.xpath('//table[@id="pgl_basic"]/tbody/tr')
+        title = response.xpath('//h1[@itemprop="name"]/text()').extract_first()
+
+        data = {
+            'player': title,
+            'gamelog': []
+        }
 
         for row in rows:
-            yield {
+            data['gamelog'].append({
                 'minutes': row.xpath('td[@data-stat="mp"]/text()').extract_first(),
                 'date': row.xpath('td[@data-stat="date_game"]/a/text()').extract_first(),
-            }
+                'fta': row.xpath('td[@data-stat="fta"]/text()').extract_first()
+            })
+        yield data
