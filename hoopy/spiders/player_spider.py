@@ -1,5 +1,6 @@
-import scrapy
 import time
+import scrapy
+
 
 class PlayerSpider(scrapy.Spider):
     name = "player"
@@ -12,22 +13,15 @@ class PlayerSpider(scrapy.Spider):
         gamelog_urls = response.xpath('//tbody/tr/th/a/@href').extract()
 
         for url in gamelog_urls:
-            time.sleep(2)
+            time.sleep(1)
             yield response.follow(url, callback=self.parse_stats)
     
     def parse_stats(self, response):
         rows = response.xpath('//table[@id="pgl_basic"]/tbody/tr')
-        title = response.xpath('//h1[@itemprop="name"]/text()').extract_first()
-
-        data = {
-            'player': title,
-            'gamelog': []
-        }
 
         for row in rows:
-            data['gamelog'].append({
+            yield {
                 'minutes': row.xpath('td[@data-stat="mp"]/text()').extract_first(),
                 'date': row.xpath('td[@data-stat="date_game"]/a/text()').extract_first(),
                 'fta': row.xpath('td[@data-stat="fta"]/text()').extract_first()
-            })
-        yield data
+            }

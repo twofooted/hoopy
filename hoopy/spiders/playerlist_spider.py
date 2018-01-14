@@ -1,7 +1,9 @@
 import scrapy
 
-class GameSpider(scrapy.Spider):
-    name = "gamelog"
+class PlayerListSpider(scrapy.Spider):
+    ''' Gets all NBA players listed on basketball-reference's site '''
+
+    name = "playerlist"
 
     start_urls = [
         'https://www.basketball-reference.com/players/a/',
@@ -32,21 +34,28 @@ class GameSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        
+        ''' main function for parsing the NBA player table for each page '''
         for row in response.xpath('//table[@id="players"]/tbody/tr'):
             player = row.xpath('th//a/text()').extract_first()
+            if row.xpath('th[@data-stat="player"]/strong/a'):
+                is_activte = True
+            else:
+                is_activte = False
+
+            player_url = row.xpath('th[@data-stat="player"]//a/@href').extract_first()
             year_min = row.xpath('td[@data-stat="year_min"]/text()').extract_first()
             year_max = row.xpath('td[@data-stat="year_max"]/text()').extract_first()
             pos = row.xpath('td[@data-stat="pos"]/text()').extract_first()
             birth_date = row.xpath('td[@data-stat="birth_date"]/a/text()').extract_first()
             college = row.xpath('td[@data-stat="college_name"]/a/text()').extract_first()
-
+            
             yield {
                 'player': player,
-                'year_min': year_min,
-                'year_max': year_max,
-                'pos': pos,
-                'birth_date': birth_date,
-                'college': college
+                'start_year': year_min,
+                'end_year': year_max,
+                'position': pos,
+                'birthdate': birth_date,
+                'college': college,
+                'is_active': is_activte,
+                'url': player_url
             }
-        next_page = response.xpath('//table[@id="players"]/tbody/tr/th//a/@href').extract_first()
